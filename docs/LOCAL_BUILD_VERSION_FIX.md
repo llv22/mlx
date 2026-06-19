@@ -84,6 +84,34 @@ print(version("mlx"))              # 0.31.2  (same value mlx-lm's >= check uses)
 Both report `0.31.2`, consistent with the distribution metadata that mlx-lm's
 `mlx>=0.31.2` requirement is checked against.
 
+### Gotcha: `import mlx` alone does not give you `mlx.core`
+
+Because `mlx` is a namespace package, a bare `import mlx` binds only the
+namespace — it does **not** import the `core` submodule. Accessing `mlx.core`
+afterward raises `AttributeError`:
+
+```python
+import mlx
+mlx.core.__version__
+# AttributeError: module 'mlx' has no attribute 'core'
+```
+
+You must import the submodule **explicitly** before using it:
+
+```python
+import mlx.core as mx
+mx.__version__              # '0.31.2'
+
+# or
+import mlx.core
+mlx.core.__version__       # '0.31.2'
+```
+
+The same rule applies to every submodule — `import mlx.nn`,
+`import mlx.optimizers`, etc. This is standard MLX usage and is unrelated to the
+local build; `import mlx.core as mx` is the form used throughout MLX's own docs
+and examples.
+
 ## Notes
 
 - The original message is a **warning**, not a hard failure — the mlx install
