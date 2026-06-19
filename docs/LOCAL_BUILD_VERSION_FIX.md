@@ -58,6 +58,32 @@ $ pip check
 No broken requirements found.
 ```
 
+## Reading the version: `mlx.__version__` is intentionally absent
+
+`mlx.__version__` does **not** exist — and this is correct, *not* a side effect of
+the rebuild. The top-level `mlx` is a **namespace package** (there is no
+`mlx/__init__.py` in the repo); the real modules are `mlx.core`, `mlx.nn`, and
+`mlx.optimizers`. The version lives on `mlx.core`, not on the top-level package.
+
+| Access                                   | Result                          |
+|------------------------------------------|---------------------------------|
+| `mlx.__version__`                        | ❌ `AttributeError` (by design) |
+| `mlx.core.__version__`                   | ✅ `0.31.2`                     |
+| `importlib.metadata.version("mlx")`      | ✅ `0.31.2`                     |
+
+Use one of the supported forms:
+
+```python
+import mlx.core as mx
+print(mx.__version__)              # 0.31.2
+
+from importlib.metadata import version
+print(version("mlx"))              # 0.31.2  (same value mlx-lm's >= check uses)
+```
+
+Both report `0.31.2`, consistent with the distribution metadata that mlx-lm's
+`mlx>=0.31.2` requirement is checked against.
+
 ## Notes
 
 - The original message is a **warning**, not a hard failure — the mlx install
